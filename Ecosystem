@@ -67,3 +67,330 @@ void keyPressed(){
     case '5' : {wolves.remove(0); break;}
   }
 }
+
+//-------------------------------------------GRAPH--------------------------------------------
+
+class Graph {
+  /*  Shows the actual status of grass, sheep and wolves
+   *  in the gpahs on the left
+   *  ??? + contains buttons for control of entities 
+   *
+   */
+   
+  float[] grassPop;
+  float[] sheepPop;
+  float[] wolvesPop;
+  int graphSize;
+  int scale;
+  int maxSheep;
+  int maxWolves;
+  
+  
+  Graph(int scale_) {
+    scale = scale_;
+    graphSize = (width-150-map.mapSize*map.scale)/scale;
+    wolvesPop  = new float[graphSize];
+    sheepPop = new float[graphSize];
+    grassPop = new float[graphSize];
+    
+  }
+
+  void update() {
+    if(sheeps.size() > maxSheep) maxSheep = sheeps.size();
+    if(wolves.size() > maxWolves) maxWolves = wolves.size();
+    
+    for(int i=0; i<graphSize-1; i++){
+      wolvesPop[i] = wolvesPop[i+1];
+      sheepPop[i] = sheepPop[i+1];
+      grassPop[i] = grassPop[i+1];
+    }
+    
+    wolvesPop[graphSize-1]  = wolves.size();
+    sheepPop[graphSize-1] = sheeps.size();
+    grassPop[graphSize-1] = avgOfGrass();
+    
+  }
+
+  void show() {
+    pushMatrix();
+    translate(50, height-50-graphSize*scale);
+    stroke(0);
+    fill(360);
+    rect(0,0,graphSize,graphSize);
+    
+    fill(0);
+    text("maxSheep:"+maxSheep, 0, -10);
+    text("maxWolves:"+maxWolves, 100, -10);
+    
+    //grass
+    noFill();
+    stroke(120,100,50);
+    beginShape();
+    for(int i=0; i<graphSize; i++){
+      vertex(i, map(grassPop[i], 0, 100, graphSize, 0));
+    }
+    endShape();
+    fill(120,100,50);
+    text(grassPop[graphSize-1],graphSize*scale,map(grassPop[graphSize-1], 0, 100, graphSize, 0));
+    
+    
+    //sheep
+    noFill();
+    stroke(250,100,100);
+    beginShape();
+    for(int i=0; i<graphSize; i++){
+      vertex(i, map(sheepPop[i], 0, maxSheep, graphSize, 0));
+    }
+    endShape();
+    fill(250,100,100);
+    text(floor(sheepPop[graphSize-1]),graphSize*scale,map(sheepPop[graphSize-1], 0, maxSheep, graphSize, 0));
+    
+    //volves
+    noFill();
+    stroke(350,100,100);
+    beginShape();
+    for(int i=0; i<graphSize; i++){
+      vertex(i, map(wolvesPop[i], 0, maxWolves, graphSize, 0));
+    }
+    endShape();
+    fill(350,100,100);
+    text(floor(wolvesPop[graphSize-1]),graphSize*scale,map(wolvesPop[graphSize-1], 0, maxWolves, graphSize, 0));
+    
+    
+    popMatrix();
+  }
+  
+  float avgOfGrass(){
+    float total = 0;
+    for (int i=0; i<map.mapSize; i++) {
+      for (int j=0; j<map.mapSize; j++) {
+        total += lawn[i][j].quantity;
+      }
+    }
+    return total/sq(map.mapSize);
+  }
+  
+}
+
+//-----------------------------------------------GRASS------------------------------------------
+
+class Grass {
+  /*  grass is 1m x 1m
+   *  density?
+   *  How fast can 1m x 1m of grass regrow?
+   *
+   */
+   
+  float quantity; // 0 to 100
+  float rateOfGrowth;
+  
+  Grass() {
+    quantity = random(50)+25;
+    rateOfGrowth = 0.1;
+  }
+
+  void update() {
+    if(quantity<100) quantity += rateOfGrowth+random(0.02);
+  }
+
+}
+
+//---------------------------------------------------MAP
+
+class Map {
+  /*  Shows the actual status of grass, sheep and wolves
+   *  in the picture frame on the right
+   *  
+   *  
+   */
+
+  int mapSize;
+  int scale;
+
+  Map(int scale_) {
+    scale = scale_;
+    mapSize  = (min(width, height)-100)/scale;
+  }
+
+  void show() {
+    pushMatrix();
+    translate(width-mapSize*scale-50, 50);
+    noFill();
+    stroke(60, 100, 100);
+    rect(-1, -1, mapSize*scale+1, mapSize*scale+1);
+    noStroke();
+    for (int i=0; i<lawn.length; i++) {
+      for (int j=0; j<lawn[i].length; j++) {
+        fill(120, 100, 50, lawn[i][j].quantity); //green
+        rect(i*scale, j*scale, scale, scale);
+        fill(32, 100, 38, 100 - lawn[i][j].quantity);  //brown
+        rect(i*scale, j*scale, scale, scale);
+      }
+    }
+    for (Sheep s : sheeps) {
+      fill(250, 100, 100, s.health);
+      ellipse(s.pos.x*scale, s.pos.y*scale, 3*scale, 3*scale);
+    }
+    for (Wolf w : wolves) {
+      fill(350, 100, 100, w.health);
+      ellipse(w.pos.x*scale, w.pos.y*scale, 5*scale, 5*scale);
+    }
+    popMatrix();
+  }
+}
+
+//----------------------------------------------------SHEEP-------------------------------------
+
+class Sheep {
+  /*  How much 1m x 1m of grass (1 pixel) does sheep need to eat a day?
+   *
+   *
+   *
+   */
+
+
+  float fed;    // 0 to 100
+  float fedFromFood;
+  float health; // 0 to 100
+  float lifespan;
+  float maxLifespan;
+
+  PVector pos;
+  PVector vel;
+  float maxVel;
+  PVector acc;
+
+  //consume 100m^2 a week
+
+  Sheep() {
+    pos = new PVector(random(map.mapSize), random(map.mapSize));
+    vel = PVector.random2D();
+    fed = 100;
+    fedFromFood = 20;
+    health = 100;
+    lifespan = 0;
+  }
+
+  void update() {
+    //Movement
+    pos.add(vel);
+    //vel.add(acc);
+    //steering
+    out();
+
+
+    //Life
+    fed -= 1;
+    if (fed<100 && lawn[floor(pos.x)][floor(pos.y)].quantity>=fedFromFood) {
+      fed += fedFromFood;
+      lawn[floor(pos.x)][floor(pos.y)].quantity -= fedFromFood;
+    }
+
+    if (fed<20) {
+      //seekGrass();
+      health -= 1;
+    }
+  }
+
+  void out() {
+    if (pos.x<=1) {
+      vel.set(-vel.x, vel.y);
+      pos.set(1, pos.y);
+      return;
+    } else if (pos.y<=1) {
+      vel.set(vel.x, -vel.y);
+      pos.set(pos.x, 1);
+      return;
+    } else if (pos.x>=map.mapSize-1) {
+      vel.set(-vel.x, vel.y);
+      pos.set(map.mapSize - 1, pos.y);
+      return;
+    } else if (pos.y>=map.mapSize-1) {
+      vel.set(vel.x, -vel.y);
+      pos.set(pos.x, map.mapSize-1);
+      return;
+    }
+  }
+
+  boolean dead() {
+    return health<0;
+  }
+}
+
+//--------------------------------------------------WOLF-------------------------------------
+
+class Sheep {
+  /*  How much 1m x 1m of grass (1 pixel) does sheep need to eat a day?
+   *
+   *
+   *
+   */
+
+
+  float fed;    // 0 to 100
+  float fedFromFood;
+  float health; // 0 to 100
+  float lifespan;
+  float maxLifespan;
+
+  PVector pos;
+  PVector vel;
+  float maxVel;
+  PVector acc;
+
+  //consume 100m^2 a week
+
+  Sheep() {
+    pos = new PVector(random(map.mapSize), random(map.mapSize));
+    vel = PVector.random2D();
+    fed = 100;
+    fedFromFood = 20;
+    health = 100;
+    lifespan = 0;
+  }
+
+  void update() {
+    //Movement
+    pos.add(vel);
+    //vel.add(acc);
+    //steering
+    out();
+
+
+    //Life
+    fed -= 1;
+    if (fed<100 && lawn[floor(pos.x)][floor(pos.y)].quantity>=fedFromFood) {
+      fed += fedFromFood;
+      lawn[floor(pos.x)][floor(pos.y)].quantity -= fedFromFood;
+    }
+
+    if (fed<20) {
+      //seekGrass();
+      health -= 1;
+    }
+  }
+
+  void out() {
+    if (pos.x<=1) {
+      vel.set(-vel.x, vel.y);
+      pos.set(1, pos.y);
+      return;
+    } else if (pos.y<=1) {
+      vel.set(vel.x, -vel.y);
+      pos.set(pos.x, 1);
+      return;
+    } else if (pos.x>=map.mapSize-1) {
+      vel.set(-vel.x, vel.y);
+      pos.set(map.mapSize - 1, pos.y);
+      return;
+    } else if (pos.y>=map.mapSize-1) {
+      vel.set(vel.x, -vel.y);
+      pos.set(pos.x, map.mapSize-1);
+      return;
+    }
+  }
+
+  boolean dead() {
+    return health<0;
+  }
+}
