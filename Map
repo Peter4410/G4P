@@ -1,0 +1,41 @@
+class Map {
+  /*  Shows the actual status of grass, sheep and wolves
+   *  in the picture frame on the right
+   *  
+   *  
+   */
+
+  int mapSize;
+  int scale;
+
+  Map(int scale_) {
+    scale = scale_;
+    mapSize  = (min(width, height)-100)/scale;
+  }
+
+  void show() {
+    pushMatrix();    //save the coordinates
+    translate(width-mapSize*scale-50, 50);  //shift coordinates to the map
+    noFill();                                //no color of map
+    stroke(60, 100, 100);                    
+    rect(-1, -1, mapSize*scale+1, mapSize*scale+1);
+    noStroke();
+    for (int i=0; i<lawn.length; i++) {
+      for (int j=0; j<lawn[i].length; j++) {
+        fill(120, 100, 50, lawn[i][j].quantity); //green
+        rect(i*scale, j*scale, scale, scale);
+        fill(32, 100, 38, 100 - lawn[i][j].quantity);  //brown
+        rect(i*scale, j*scale, scale, scale);
+      }
+    }
+    for (Sheep s : sheeps) {
+      fill(250, 100, 100, s.health);
+      ellipse(s.pos.x*scale, s.pos.y*scale, 3*scale, 3*scale);
+    }
+    for (Wolf w : wolves) {
+      fill(350, 100, 100, w.health);
+      ellipse(w.pos.x*scale, w.pos.y*scale, 5*scale, 5*scale);
+    }
+    popMatrix();
+  }
+}
