@@ -406,5 +406,40 @@ class Wolf{
       }
     }
   }
+  Sheep closest() {
 
+    float closest = 1000000;
+    float current;
+    Sheep closestSheep  = sheeps.get(0);
+    for (int i = 0; i < sheeps.size(); i++) {
+
+      current = dist(this.pos.x, this.pos.y, sheeps.get(i).pos.x, sheeps.get(i).pos.y);
+      if (current < closest) {
+
+        closest = current;
+        closestSheep = sheeps.get(i);
+      }
+    }
+    return closestSheep;
+  }
+
+  void seek() {
+    Sheep closestSheep = closest();
+    PVector desired = PVector.sub(pos, closestSheep.pos);
+
+    //Maximum speed
+    desired.setMag(map(fed, 0, 100, 1, 0.01));
+
+    //Steering = Desired minus velocity
+
+    PVector steer = PVector.sub(desired, this.vel);
+    //steer.limit(this.maxForce); //limit to maximum steering force
+
+    this.applyForce(steer);
+  }
+  
+  void applyForce(PVector steer){
+  
+    this.acc.add(steer);
+  }
 }
