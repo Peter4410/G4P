@@ -37,7 +37,12 @@ void draw() {
   graph.show();
   map.show();
 }
-
+void toText(){
+   PrintWriter out = new PrintWriter("DataG4P.txt");
+   out.println("Sheeps:"+sheeps.size);
+   out.println("Wolves:"+wolves.size);
+ }
+ 
 void updateWorld() {
   for (int i=0; i<map.mapSize; i++) {
     for (int j=0; j<map.mapSize; j++) {
