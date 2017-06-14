@@ -46,6 +46,7 @@ void draw() {
 }
 void toText(){
    output.println("Sheeps:"+sheeps.size() + "Wolves:"+wolves.size());
+ }
  
  void closing() {
     output.flush();
