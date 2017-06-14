@@ -336,78 +336,62 @@ class Sheep {
 
 //--------------------------------------------------WOLF-------------------------------------
 
-class Sheep {
-  /*  How much 1m x 1m of grass (1 pixel) does sheep need to eat a day?
+class Wolf{
+  /*  How many days can wolf last from 1 sheep
    *
    *
    *
    */
-
-
+   
   float fed;    // 0 to 100
   float fedFromFood;
   float health; // 0 to 100
   float lifespan;
   float maxLifespan;
-
+  
   PVector pos;
   PVector vel;
   float maxVel;
   PVector acc;
-
-  //consume 100m^2 a week
-
-  Sheep() {
+  
+  Wolf() {
     pos = new PVector(random(map.mapSize), random(map.mapSize));
     vel = PVector.random2D();
     fed = 100;
-    fedFromFood = 20;
     health = 100;
     lifespan = 0;
   }
 
   void update() {
-    //Movement
+    //MOVEMENT
+    out();
     pos.add(vel);
     //vel.add(acc);
     //steering
-    out();
-
-
-    //Life
-    fed -= 1;
-    if (fed<100 && lawn[floor(pos.x)][floor(pos.y)].quantity>=fedFromFood) {
-      fed += fedFromFood;
-      lawn[floor(pos.x)][floor(pos.y)].quantity -= fedFromFood;
-    }
-
-    if (fed<20) {
-      //seekGrass();
-      health -= 1;
-    }
+    
   }
-
-  void out() {
-    if (pos.x<=1) {
+  
+    void out(){
+    if(pos.x<=0){
       vel.set(-vel.x, vel.y);
       pos.set(1, pos.y);
       return;
-    } else if (pos.y<=1) {
+    }
+    else if(pos.y<=0){
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, 1);
       return;
-    } else if (pos.x>=map.mapSize-1) {
+    }
+    else if(pos.x>=map.mapSize){
       vel.set(-vel.x, vel.y);
       pos.set(map.mapSize - 1, pos.y);
       return;
-    } else if (pos.y>=map.mapSize-1) {
+    }
+    else if(pos.y>=map.mapSize){
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, map.mapSize-1);
       return;
     }
   }
 
-  boolean dead() {
-    return health<0;
-  }
 }
