@@ -336,28 +336,29 @@ class Sheep {
 
 //--------------------------------------------------WOLF-------------------------------------
 
-class Wolf {
+class Wolf{
   /*  How many days can wolf last from 1 sheep
    *
    *
    *
    */
-
+   
   float fed;    // 0 to 100
   float fedFromFood;
+  float health; // 0 to 100
   float lifespan;
   float maxLifespan;
-
+  
   PVector pos;
   PVector vel;
   float maxVel;
   PVector acc;
-
-
+  
   Wolf() {
     pos = new PVector(random(map.mapSize), random(map.mapSize));
     vel = PVector.random2D();
     fed = 100;
+    health = 100;
     lifespan = 0;
   }
 
@@ -367,66 +368,43 @@ class Wolf {
     pos.add(vel);
     //vel.add(acc);
     //steering
+    
   }
-
-  void out() {
-    if (pos.x<=0) {
+  
+    void out(){
+    if(pos.x<=0){
       vel.set(-vel.x, vel.y);
       pos.set(1, pos.y);
       return;
-    } else if (pos.y<=0) {
+    }
+    else if(pos.y<=0){
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, 1);
       return;
-    } else if (pos.x>=map.mapSize) {
+    }
+    else if(pos.x>=map.mapSize){
       vel.set(-vel.x, vel.y);
       pos.set(map.mapSize - 1, pos.y);
       return;
-    } else if (pos.y>=map.mapSize) {
+    }
+    else if(pos.y>=map.mapSize){
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, map.mapSize-1);
       return;
     }
   }
-  boolean dead() {
-    return fed<0;
+  
+  boolean dead(){
+    return fed<=0;
   }
-
-  Sheep closest() {
-
-    float closest = 1000000;
-    float current;
-    Sheep closestSheep  = sheeps.get(0);
-    for (int i = 0; i < sheeps.size(); i++) {
-
-      current = dist(this.pos.x, this.pos.y, sheeps.get(i).pos.x, sheeps.get(i).pos.y);
-      if (current < closest) {
-
-        closest = current;
-        closestSheep = sheeps.get(i);
+  
+  void eatSheep(){
+    for(int i=sheeps.size()-1; i>=0; i--){
+      Sheep s = sheeps.get(i);
+      if(dist(pos.x, pos.y, s.pos.x, s.pos.y)<map.sheepR+map.wolfR){
+        sheeps.remove(i);
       }
     }
-    return closestSheep;
   }
 
-  void seek() {
-    Sheep closestSheep = closest();
-    PVector desired = PVector.sub(pos, closestSheep.pos);
-
-    //Maximum speed
-    desired.setMag(map(fed, 0, 100, 1, 0.01));
-
-    //Steering = Desired minus velocity
-
-    PVector steer = PVector.sub(desired, this.vel);
-    //steer.limit(this.maxForce); //limit to maximum steering force
-
-    this.applyForce(steer);
-  }
-  
-  void applyForce(PVector steer){
-  
-    this.acc.add(steer);
-  }
 }
-
