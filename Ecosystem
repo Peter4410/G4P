@@ -26,9 +26,9 @@ void setup() {
     }
   }
   //Add sheep
-  for(int i=0; i<50; i++) sheeps.add(new Sheep());
+  for(int i=0; i<50; i++) sheeps.add(new Sheep(275));
   //Add wolves
-  for(int i=0; i<10; i++) wolves.add(new Wolf());
+  for(int i=0; i<10; i++) wolves.add(new Wolf(275));
   
 }
 
@@ -39,15 +39,16 @@ void draw() {
   if(frameCount%4==0){
   graph.update();
   toText();
-  
   }
 
   graph.show();
   map.show();
 }
+
 void toText(){
    output.println("Sheeps:"+sheeps.size() + "Wolves:"+wolves.size());
 } 
+
  void closing(){
     output.flush();
     output.close();
@@ -60,11 +61,11 @@ void updateWorld() {
       lawn[i][j].update();
     }
   }
-  for (Sheep s : sheeps) {
-    s.update();
+  for (int i = 0; i<sheeps.size();i++){
+    sheeps.get(i).update();
   }
-  for (Wolf w : wolves) {
-    w.update();
+  for (int i = 0; i < wolves.size(); i++) {
+    wolves.get(i).update();
   }
   
   for(int i=sheeps.size()-1; i>=0; i--){
@@ -73,7 +74,6 @@ void updateWorld() {
   for(int i=wolves.size()-1; i>=0; i--){
     if(wolves.get(i).dead()) wolves.remove(i);
   }
-  
 }
 
 /*void mousePressed() {
@@ -85,9 +85,9 @@ void updateWorld() {
 
 void keyPressed(){
   switch(key){
-    case '7' : {sheeps.add(new Sheep()); break;}
+    case '7' : {sheeps.add(new Sheep(275)); break;}
     case '4' : {sheeps.remove(0); break;}
-    case '8' : {wolves.add(new Wolf()); break;}
+    case '8' : {wolves.add(new Wolf(265)); break;}
     case '5' : {wolves.remove(0); break;}
     case '0' : {closing(); break;}
   }
@@ -272,7 +272,7 @@ class Map {
 
 //----------------------------------------------------SHEEP-------------------------------------
 
-class Sheep {
+class Sheep{
   /*  How much 1m x 1m of grass (1 pixel) does sheep need to eat a day?
    *
    *
@@ -284,23 +284,25 @@ class Sheep {
   float fedFromFood;
   int lifespan;
   int maxLifespan;
-  int birthCycle;
+  float birthCycle;
 
   PVector pos;
   PVector vel;
   float maxSpeed;
   PVector acc;
 
+  
+
   //consume 100m^2 a week
 
-  Sheep() {
+  Sheep(int birthCycle_) {
     pos = new PVector(random(map.mapSize), random(map.mapSize));
     vel = PVector.random2D();
     fed = 100;
     fedFromFood = 20;
     lifespan = 0;
     maxLifespan = 12 * 365;
-    birthCycle = 278;
+    birthCycle = random(birthCycle_);
   }
 
   void update() {
@@ -350,10 +352,10 @@ class Sheep {
   }
 
   void birth() {
-    if (birthCycle<0 && fed>80){
-      sheeps.add(new Sheep());
+    if (birthCycle<0 && fed>50){
+      sheeps.add(new Sheep(275));
       fed -= 50;
-      birthCycle = 278;
+      birthCycle = 267;
     }
   }
 
@@ -372,8 +374,6 @@ class Sheep {
     //    this.applyForce(steer);
     //}
   }
-
-
 //--------------------------------------------------WOLF-------------------------------------
 
 class Wolf {
@@ -387,6 +387,7 @@ class Wolf {
   float fedFromFood;
   float lifespan;
   float maxLifespan;
+  float birthCycle;
 
   PVector pos;
   PVector vel;
@@ -394,13 +395,14 @@ class Wolf {
   PVector acc;
 
 
-  Wolf() {
+  Wolf(int birthCycle_) {
     pos = new PVector(random(map.mapSize), random(map.mapSize));
     vel = PVector.random2D();
     acc = new PVector(0, 0);
 
     fed = 100;
     lifespan = 0;
+    birthCycle = random(birthCycle_);
   }
 
   void update() {
@@ -411,7 +413,10 @@ class Wolf {
     if (fed<90)acc.set(seekForce());
     out();
 
+    lifespan++;
+    birthCycle--;
     eatSheep();
+    birth();
     fed-=1;
   }
 
@@ -452,7 +457,7 @@ class Wolf {
   }
 
   Sheep closest() {
-    if (sheeps.size()==0) return new Sheep();
+    if (sheeps.size()==0) return new Sheep(275);
     float closest = 1000000;
     float current;
     Sheep closestSheep = sheeps.get(0);
@@ -496,5 +501,13 @@ class Wolf {
     force.setMag(map(fed, 0, 100, 1, 0.01));
 
     return force;
+  }
+  
+  void birth() {
+    if (birthCycle<0 && fed>50){
+      wolves.add(new Wolf(275));
+      fed -= 50;
+      birthCycle = 267;
+    }
   }
 }
