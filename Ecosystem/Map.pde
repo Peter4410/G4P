@@ -10,19 +10,20 @@ class Map {
   float sheepR;
   float wolfR;
   float R;
-  PShape sheepLS, sheepRS, wolfLS, wolfRS, sheepS;
+  PShape sheepLS, sheepRS, wolfLS, wolfRS, sheepS, wolfS;
 
   Map(int scale_) {
     scale = scale_;
     mapSize  = (min(width, height)-100)/scale;
     sheepR = 3;
     wolfR = 5;
-    R = (wolfR+sheepR)/scale;
+    R = 2*(wolfR+sheepR)/scale;
     sheepRS = loadShape("sheepR.svg");
     sheepLS = loadShape("sheepL.svg");
     sheepS = loadShape("sheepS.svg");
-    wolfRS = loadShape("wolfR.svg");
-    wolfLS = loadShape("wolfL.svg");
+    wolfRS = loadShape("wolfR2.svg");
+    wolfLS = loadShape("wolfL2.svg");
+    wolfS = loadShape("wolfS.svg");
   }
 
   void show() {
@@ -38,32 +39,48 @@ class Map {
     shapeMode(CENTER);
     for (int i=0; i<lawn.length; i++) {
       for (int j=0; j<lawn[i].length; j++) {
-        fill(120, 100, 50, lawn[i][j].quantity); //green
+        fill(120, 100, 50, map(lawn[i][j].quantity, 0, lawn[i][j].maxGrass, 0, 100)); //green
         rect(i*scale, j*scale, scale, scale);
-        fill(32, 100, 38, 100 - lawn[i][j].quantity);  //brown
+        fill(32, 100, 38, map(lawn[i][j].quantity, 0, lawn[i][j].maxGrass, 100, 0));  //brown
         rect(i*scale, j*scale, scale, scale);
       }
     }
-    for (Sheep s : sheeps) {
-      if (sheeps.size()<250) {
-        if (s.vel.x>0)shape(sheepRS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
-        if (s.vel.x<=0)shape(sheepLS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
-      } else if (sheeps.size()<1000) {
-        shape(sheepS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
-      } else {
-        fill(360);  //fill(0, 0, 100, s.fedForDays*50);
-        ellipse(s.pos.x*scale, s.pos.y*scale, sheepR*scale, sheepR*scale);
+    switch(showVersion) {
+    case 0 : 
+      {
+        for (Sheep s : sheeps) {
+          fill(360);  //fill(0, 0, 100, s.fedForDays*50);
+          ellipse(s.pos.x*scale, s.pos.y*scale, sheepR*scale, sheepR*scale);
+        }
+        for (Wolf w : wolves) {
+          fill(250);  //fill(350, 100, 100, w.fedForDays*10);
+          ellipse(w.pos.x*scale, w.pos.y*scale, wolfR*scale, wolfR*scale);
+        }
+        break;
       }
-    }
-    for (Wolf w : wolves) {
-      if (wolves.size()<250) {
-        if (w.vel.x>0)shape(wolfRS, w.pos.x*scale, w.pos.y*scale, 10*scale, 10*scale);
-        if (w.vel.x<=0)shape(wolfLS, w.pos.x*scale, w.pos.y*scale, 10*scale, 10*scale);
-      } else {
-        fill(250);  //fill(350, 100, 100, w.fedForDays*10);
-        ellipse(w.pos.x*scale, w.pos.y*scale, wolfR*scale, wolfR*scale);
+    case 1 : 
+      {
+        for (Sheep s : sheeps) {
+          shape(sheepS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
+        }
+        for (Wolf w : wolves) {
+          shape(wolfS, w.pos.x*scale, w.pos.y*scale, 10*scale, 10*scale);
+        }
+        break;
       }
-    }
+    case 2 :
+      {
+        for (Sheep s : sheeps) {
+          if (s.vel.x>0)shape(sheepRS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
+          if (s.vel.x<=0)shape(sheepLS, s.pos.x*scale, s.pos.y*scale, 10*scale, 10*scale);
+        }
+        for (Wolf w : wolves) {
+          if (w.vel.x>0)shape(wolfRS, w.pos.x*scale, w.pos.y*scale, 10*scale, 10*scale);
+          if (w.vel.x<=0)shape(wolfLS, w.pos.x*scale, w.pos.y*scale, 10*scale, 10*scale);
+        }
+        break;
+      }
+    } 
     popMatrix();
   }
 }
