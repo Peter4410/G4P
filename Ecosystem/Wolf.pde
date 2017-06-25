@@ -103,7 +103,7 @@ class Wolf {
     if (birthCycle<0 && fedForDays>=fedThreshold) {
       wolves.add(new Wolf(pos, fedForDays/2));
       fedForDays /= 2;
-      birthCycle = 487;
+      birthCycle = 365/5*48;
     }
   }
   
