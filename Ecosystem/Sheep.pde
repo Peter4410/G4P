@@ -19,7 +19,7 @@ class Sheep {
   float maxVel;
   PVector acc;
 
-  //consume 100m^2 a week
+  //consume 10m^2 a day
 
   Sheep(PVector pos_, float fedForDays_) {
     fedForDays = fedForDays_;
@@ -29,7 +29,7 @@ class Sheep {
     lifespan = 0;
     maxLifespan = 12 * 365;
 
-    birthCycle = 267;
+    birthCycle = 243;
 
     pos = pos_;
     vel = PVector.random2D();
@@ -98,7 +98,7 @@ class Sheep {
     if (birthCycle<0 && fedForDays>fedThreshold) {
       sheeps.add(new Sheep(pos, fedForDays/2));
       fedForDays /= 2;
-      birthCycle = 267;
+      birthCycle = 243;
     }
   }
 }
