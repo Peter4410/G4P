@@ -59,11 +59,11 @@ class Graph {
     stroke(120,100,50);
     beginShape(); //starts at the first point 
     for(int i=0; i<graphSize; i++){
-      vertex(i*scale, map(grassPop[i], 0, 100, graphSize*scale, 0));
+      vertex(i*scale, graphSize*scale*(1 - grassPop[i]/100));
     }
     endShape(); //connects with the end point
     fill(120,100,50);
-    text(grassPop[graphSize-1],graphSize*scale+2,map(grassPop[graphSize-1], 0, 100, graphSize*scale, 0));
+    text(grassPop[graphSize-1],graphSize*scale+2,graphSize*scale*(1-grassPop[graphSize-1]/100));
     
     //sheep
     noFill();
@@ -97,7 +97,9 @@ class Graph {
         total += lawn[i][j].quantity;        //adds all the quantity of grass together
       }
     }
-    return total/sq(map.mapSize);            //calculates the average
+    float retVal = total/sq(map.mapSize)/lawn[0][0].maxGrass*100;            //calculates the average
+    if(100-retVal<0.1) return 100;
+    return retVal;
   }
   
 }
