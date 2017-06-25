@@ -18,47 +18,55 @@ class Wolf {
   PVector vel;
   float maxVel;
   PVector acc;
+  float maxAcc;
 
-  
+  int findCount;
+  Sheep closest;
+
+
   Wolf(PVector pos_, float fedForDays_) {
     fedForDays = fedForDays_;
-    fedFromFood = 11;
-    fedThreshold = 10;
+    fedFromFood = 15;
+    fedThreshold = 20;
 
     lifespan = 0;
     maxLifespan = 7 * 365;
 
-    birthCycle = 487;
+    birthCycle = (365/5*48) *random(0.9, 1.1);
 
     pos = pos_;
     vel = PVector.random2D();
-    acc = new PVector(0, 0);
     maxVel = 10;
+    acc = new PVector(0, 0);
+    maxAcc = 50;
+
+    findCount = 10;
+    closest = findClosest();
   }
-  
-  Wolf(){
+
+  Wolf() {
     this(new PVector(random(map.mapSize), random(map.mapSize)), random(5)+6);
     lifespan = random(maxLifespan);
     birthCycle = random(birthCycle);
   }
-  
+
 
   void update() {
+    ++lifespan;
+    --birthCycle;
+    fedForDays -= 1;
+
     move();
     out();
 
     eatSheep();
     birth();
-
-    ++lifespan;
-    --birthCycle;
-    --fedForDays;
   }
-  
+
   void move() { 
     pos.add(vel);
     vel.add(acc);
-    vel.limit(maxVel);
+    //vel.limit(maxVel);
     acc.set(seekForce());
   }
 
@@ -90,53 +98,63 @@ class Wolf {
     if (fedForDays<fedThreshold) {
       for (int i=sheeps.size()-1; i>=0; i--) {
         Sheep s = sheeps.get(i);
-        if (dist(pos.x, pos.y, s.pos.x, s.pos.y)<map.R) {
+        if (dist(pos.x, pos.y, s.pos.x, s.pos.y)<=map.R) {
           sheeps.remove(i);
           fedForDays += fedFromFood;
-          break;
+          findCount=0;
+          return;
         }
       }
+      sheeps.remove(floor(random(sheeps.size())));
+      fedForDays += fedFromFood;
+      findCount=0;
+      return;
     }
   }
-  
+
   void birth() {
     if (birthCycle<0 && fedForDays>=fedThreshold) {
-      wolves.add(new Wolf(pos, fedForDays/2));
-      fedForDays /= 2;
-      birthCycle = 365/5*48;
+      wolves.add(new Wolf(pos.copy(), fedForDays*2/3));
+      fedForDays *= 2/3;
+      birthCycle = 365/5*48*random(0.9, 1.1);
     }
   }
-  
+
   PVector seekForce() {
-    PVector force;
-    
-    Sheep closest = findClosest();
-    if(closest==null) return new PVector();
-    
-    PVector start = new PVector(0, 0);
-    start.add(pos);
-    start.add(vel);
-    PVector end = new PVector(0, 0);
-    end.add(closest.pos);
+    if (findCount-- < 0 || closest==null) closest = findClosest();
+    if (closest==null) return new PVector();
 
-    force = end.sub(start);
-    force.setMag(map(fedForDays, 0, fedThreshold, 10, 2));
+    PVector desired = PVector.sub(closest.pos.add(closest.vel), pos);
+    desired.setMag(maxVel);
+    PVector steering = PVector.sub(desired, vel);
+    steering.limit(maxAcc);
 
-    return force;
+    return steering;
+
+    /*PVector start = new PVector(0, 0);
+     start.add(pos);
+     start.add(vel);
+     PVector end = new PVector(0, 0);
+     end.add(closest.pos);
+     
+     PVector force = end.copy().sub(start);
+     //force.mult(map(fedForDays, 0, fedThreshold, 1, 0));
+     
+     return force;*/
   }
-  
+
   Sheep findClosest() {
     if (sheeps.size()==0) return null;
-    float closestDist = dist(this.pos.x, this.pos.y, sheeps.get(1).pos.x, sheeps.get(1).pos.y);
+    float closestDist = dist(this.pos.x, this.pos.y, sheeps.get(0).pos.x, sheeps.get(0).pos.y);
     int closestSheep = 0;
     for (int i = 1; i < sheeps.size(); i++) {
-      float current = dist(this.pos.x, this.pos.y, sheeps.get(i).pos.x, sheeps.get(i).pos.y);
-      if (current < closestDist) {
-        closestDist = current;
+      float currentDist = dist(this.pos.x, this.pos.y, sheeps.get(i).pos.x, sheeps.get(i).pos.y);
+      if (currentDist < closestDist) {
+        closestDist = currentDist;
         closestSheep = i;
       }
     }
+    findCount = 10;
     return sheeps.get(closestSheep);
   }
-  
 }
