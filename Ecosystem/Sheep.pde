@@ -6,8 +6,8 @@ class Sheep {
    */
 
   float fedForDays;
-  float fedFromFood;
   float fedThreshold;
+  float foodForDay;
 
   float lifespan;
   float maxLifespan;
@@ -23,13 +23,13 @@ class Sheep {
 
   Sheep(PVector pos_, float fedForDays_) {
     fedForDays = fedForDays_;
-    fedFromFood = 1.5;
-    fedThreshold = 1;
+    fedThreshold = 5;
+    foodForDay = 2.4;
 
     lifespan = 0;
     maxLifespan = 12 * 365;
 
-    birthCycle = 243;
+    birthCycle = 243*random(0.9,1.1);
 
     pos = pos_;
     vel = PVector.random2D();
@@ -55,38 +55,38 @@ class Sheep {
     --fedForDays;
   }
 
-  void move(){
+  void move() {
     pos.add(vel);
     vel.add(acc);
-    vel.limit(maxVel);
+    vel.setMag(maxVel);
     acc.set(PVector.random2D());
     acc.mult(0.1);
   }
-  
+
   void out() {
     if (pos.x<=1) {
       vel.set(-vel.x, vel.y);
       pos.set(1, pos.y);
-      return;
-    } else if (pos.y<=1) {
+    } 
+    if (pos.y<=1) {
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, 1);
-      return;
-    } else if (pos.x>=map.mapSize-1) {
+    }
+    if (pos.x>=map.mapSize-1) {
       vel.set(-vel.x, vel.y);
       pos.set(map.mapSize - 1, pos.y);
-      return;
-    } else if (pos.y>=map.mapSize-1) {
+    }
+    if (pos.y>=map.mapSize-1) {
       vel.set(vel.x, -vel.y);
       pos.set(pos.x, map.mapSize-1);
-      return;
     }
   }
 
   void eatGrass() {
-    if (fedForDays<fedThreshold && lawn[floor(pos.x)][floor(pos.y)].quantity>=fedFromFood) {
-      fedForDays += fedFromFood;
-      lawn[floor(pos.x)][floor(pos.y)].quantity -= fedFromFood*10;
+    Grass g = lawn[floor(pos.x)][floor(pos.y)];
+    if (fedForDays<fedThreshold) {
+      fedForDays += g.quantity/foodForDay;
+      g.quantity = 0;
     }
   }
 
@@ -96,9 +96,9 @@ class Sheep {
 
   void birth() {
     if (birthCycle<0 && fedForDays>fedThreshold) {
-      sheeps.add(new Sheep(pos, fedForDays/2));
+      sheeps.add(new Sheep(pos.copy(), fedForDays/2));
       fedForDays /= 2;
-      birthCycle = 243;
+      birthCycle = 243*random(0.9,1.1);
     }
   }
 }
