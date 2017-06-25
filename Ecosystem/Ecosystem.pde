@@ -1,6 +1,6 @@
-float initGrass  = 50;
-int   initSheep  = 50;
-int   initWolves = 10;
+float initGrass  = 2;
+int   initSheep  = 5000;
+int   initWolves = 100;
 
 ArrayList<Wolf> wolves;
 ArrayList<Sheep> sheeps;
@@ -12,16 +12,21 @@ Map map;
 Graph graph;
 Labels labels;
 
+boolean showMap;
+int showVersion;
+
 void setup() {
-  size(1000, 700);
+  size(1200, 800);
   colorMode(HSB, 360, 100, 100);
   map = new Map(2);
-  graph = new Graph(0.3);
+  graph = new Graph(0.1);
   labels = new Labels();
+  showMap = true;
+  showVersion=0;
   
   output = createWriter("DataG4P.txt");
   output.println("year;day;numOfSheep;numOfWolves;avgOfGrass");
-  
+
   lawn = new Grass[map.mapSize][map.mapSize];
   sheeps = new ArrayList();
   wolves = new ArrayList();
@@ -46,13 +51,13 @@ void draw() {
   toText();
 
   graph.show();
-  map.show();
+  if (showMap)map.show();
   labels.show();
 }
 
 void toText() {
   //output.format("Year:%-2d day:%-3d sheeps:%-4d wolf:%-4d grass:%4f\n",frameCount/365,frameCount%365,sheeps.size(),wolves.size(),graph.avgOfGrass());
-  output.format("%d;%d;%d;%d;%f\n",frameCount/365,frameCount%365,sheeps.size(),wolves.size(),graph.avgOfGrass());
+  output.format("%d;%d;%d;%d;%f\n", frameCount/365, frameCount%365, sheeps.size(), wolves.size(), graph.avgOfGrass());
 } 
 
 void closeFile() {
@@ -81,7 +86,7 @@ void updateWorld() {
   }
 }
 
-void mouseClicked(){
+void mouseClicked() {
   labels.click();
 }
 
@@ -91,6 +96,11 @@ void keyPressed() {
     {
       closeFile();
       exit();
+      break;
+    }
+  case 'm' : 
+    {
+      showMap = !showMap;
       break;
     }
   }
