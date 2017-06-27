@@ -37,12 +37,12 @@ class Map {
     rect(-1, -1, mapSize*scale+1, mapSize*scale+1);
     noStroke();
     shapeMode(CENTER);
-    for (int i=0; i<lawn.length; i++) {
-      for (int j=0; j<lawn[i].length; j++) {
-        fill(120, 100, 50, map(lawn[i][j].quantity, 0, lawn[i][j].maxGrass, 0, 100)); //green
-        rect(i*scale, j*scale, scale, scale);
-        fill(32, 100, 38, map(lawn[i][j].quantity, 0, lawn[i][j].maxGrass, 100, 0));  //brown
-        rect(i*scale, j*scale, scale, scale);
+    fill(32, 100, 38, 75);
+    rect(0, 0, mapSize*scale, mapSize*scale);
+    for (int i=0; i<lawn.length; i+=1) {
+      for (int j=0; j<lawn[i].length; j+=1) {
+        fill(120, 100, 50, map(lawn[i][j].quantity, 0, lawn[i][j].maxGrass, 0, 80)); //green
+        rect(i*scale, j*scale, scale*1, scale*1);
       }
     }
     switch(showVersion) {
