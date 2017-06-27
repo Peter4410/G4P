@@ -32,7 +32,7 @@ class Wolf {
     lifespan = 0;
     maxLifespan = 7 * 365;
 
-    birthCycle = (365/5*48) *random(0.9, 1.1);
+    birthCycle = (365*1.6) *random(0.9, 1.1);
 
     pos = pos_;
     vel = PVector.random2D();
@@ -105,9 +105,11 @@ class Wolf {
           return;
         }
       }
-      sheeps.remove(floor(random(sheeps.size())));
-      fedForDays += fedFromFood;
-      findCount=0;
+      /*if (sheeps.size()>0) {        GOD-LIKE POWERS
+        sheeps.remove(floor(random(sheeps.size())));
+        fedForDays += fedFromFood;
+        findCount=0;
+      }*/
       return;
     }
   }
@@ -115,8 +117,8 @@ class Wolf {
   void birth() {
     if (birthCycle<0 && fedForDays>=fedThreshold) {
       wolves.add(new Wolf(pos.copy(), fedForDays*2/3));
-      fedForDays *= 2/3;
-      birthCycle = 365/5*48*random(0.9, 1.1);
+      birthCycle = (365*1.6) *random(0.9, 1.1);
+      fedForDays = fedForDays * 2/3;
     }
   }
 
