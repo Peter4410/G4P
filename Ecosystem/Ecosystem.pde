@@ -1,6 +1,6 @@
-float initGrass  = 2;
-int   initSheep  = 5000;
-int   initWolves = 100;
+float initGrass  = 0;
+int   initSheep  = 0;
+int   initWolves = 0;
 
 ArrayList<Wolf> wolves;
 ArrayList<Sheep> sheeps;
@@ -57,7 +57,8 @@ void draw() {
 
 void toText() {
   //output.format("Year:%-2d day:%-3d sheeps:%-4d wolf:%-4d grass:%4f\n",frameCount/365,frameCount%365,sheeps.size(),wolves.size(),graph.avgOfGrass());
-  output.format("%d;%d;%d;%d;%f\n", frameCount/365, frameCount%365, sheeps.size(), wolves.size(), graph.avgOfGrass());
+  String o = ""+frameCount/365+';'+frameCount%365+';'+sheeps.size()+';'+wolves.size()+';'+graph.avgOfGrass();
+  output.println(o);
 } 
 
 void closeFile() {
@@ -82,7 +83,10 @@ void updateWorld() {
     if (sheeps.get(i).dead()) sheeps.remove(i);
   }
   for (int i=wolves.size()-1; i>=0; i--) {
-    if (wolves.get(i).dead()) wolves.remove(i);
+    if (wolves.get(i).dead()) {
+      print("fed:"+wolves.get(i).fedForDays+" lifespan:"+wolves.get(i).lifespan+"/"+wolves.get(i).maxLifespan+"\t");
+      wolves.remove(i);
+    }
   }
 }
 
