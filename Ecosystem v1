@@ -1,4 +1,3 @@
-
 ArrayList<Wolf> wolves;
 ArrayList<Sheep> sheeps;
 Grass[][] lawn;
