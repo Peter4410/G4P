@@ -1,4 +1,4 @@
-float initGrass  = 1;
+float initGrass  = 0;
 int   initSheep  = 0;
 int   initWolves = 0;
 
